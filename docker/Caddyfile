@@ -1,0 +1,22 @@
+{
+    auto_https disable_redirects
+    default_sni {$SOLOINVENTORY_HOST}
+}
+
+https://{$SOLOINVENTORY_HOST} {
+    tls internal
+    reverse_proxy app:8080
+}
+
+:80 {
+    handle /certificato.crt {
+        root * /data/caddy/pki/authorities/local
+        rewrite * /root.crt
+        header Content-Type application/x-x509-ca-cert
+        header Content-Disposition "attachment; filename=soloinventory-root-ca.crt"
+        file_server
+    }
+    handle {
+        redir https://{$SOLOINVENTORY_HOST}:{$SOLOINVENTORY_HTTPS_PORT}{uri} 308
+    }
+}

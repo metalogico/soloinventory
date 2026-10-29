@@ -1,0 +1,32 @@
+services:
+  app:
+    environment:
+      SESSION_SECURE_COOKIE: "true"
+      SOLOINVENTORY_TRUSTED_PROXIES: "*"
+    ports: !reset []
+  https:
+    image: caddy:2.10.2-alpine@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d
+    restart: unless-stopped
+    mem_limit: 128m
+    environment:
+      SOLOINVENTORY_HOST: ${SOLOINVENTORY_HOST:-soloinventory.home.arpa}
+      SOLOINVENTORY_HTTPS_PORT: ${SOLOINVENTORY_HTTPS_PORT:-8444}
+    ports:
+      - "${SOLOINVENTORY_BIND_IP:-127.0.0.1}:${SOLOINVENTORY_HTTPS_PORT:-8444}:443"
+      - "${SOLOINVENTORY_BIND_IP:-127.0.0.1}:${SOLOINVENTORY_HTTP_PORT:-8091}:80"
+    volumes:
+      - ./docker:/etc/caddy:ro
+      - tls:/data
+      - tls_config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:2019/config/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+volumes:
+  tls:
+  tls_config:
