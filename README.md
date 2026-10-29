@@ -26,30 +26,34 @@ Built with Laravel 13, PHP 8.4, Vue 3, Element Plus, Tailwind CSS and SQLite.
 
 ## Install with Docker Compose
 
-Docker downloads the prebuilt GHCR images for Linux AMD64 or ARM64. No Git, PHP, Python, Composer or Node installation is required on the server. Docker Compose 2.24.4 or newer is required.
+Docker image: **`ghcr.io/metalogico/soloinventory:latest`**
 
-The workflow publishes images when code reaches `main`. Wait for **Publish Docker images** to succeed and for the GHCR packages to be public before installing. `latest` follows main; `sha-<full commit>` selects a specific build.
+Requires Docker with Compose 2.24.4 or newer. Images support `linux/amd64` and `linux/arm64`.
 
-Download the installation files from main. The archive also contains the source, but installation does not compile it:
+### Download the configuration
+
+For a new installation:
 
 ```sh
 mkdir soloinventory
 cd soloinventory
-curl -fL "https://github.com/metalogico/soloinventory/archive/refs/heads/main.tar.gz" -o source.tar.gz
-tar -xzf source.tar.gz --strip-components=1
-```
-
-For an existing installation, follow [the transition guide](docs/UPGRADING.md) instead of copying a new `.env`. Run the following commands in the extracted directory.
-
-```sh
+curl -fL https://raw.githubusercontent.com/metalogico/soloinventory/main/compose.yaml -o compose.yaml
+curl -fL https://raw.githubusercontent.com/metalogico/soloinventory/main/.env.example -o .env.example
 cp .env.example .env
 chmod 600 .env
+```
+
+Already installed? Keep your `.env` and follow [Updating](#update).
+
+Pull the image:
+
+```sh
 docker compose pull
 ```
 
 ### Configure the account
 
-Generate a key and a bcrypt password hash using the downloaded image:
+Generate the application key and password hash:
 
 ```sh
 docker compose run --rm --no-deps app php artisan key:generate --show --no-interaction
@@ -93,7 +97,7 @@ By default, HTTP listens on loopback. To serve other devices on your private net
 
 If you use another environment file, select it in both places: set `SOLOINVENTORY_ENV_FILE=.env.local` inside that file and pass `--env-file .env.local` to every Compose command. Use the same Compose project name on every command; changing `-p` selects different volumes.
 
-The Compose service sets production mode, disables debug output and uses SQLite, file sessions, file cache and synchronous jobs. No separate database or queue container is needed. It runs as `www-data`, restarts unless stopped and has a 512 MiB memory limit. `/up` is the health endpoint.
+SQLite and photos are stored in the persistent `data` volume. The app uses a 512 MiB container limit. `/up` is the health endpoint.
 
 ## Use
 
@@ -130,30 +134,20 @@ See [backup and restore](docs/backup-and-restore.md) for a complete cold backup,
 
 ## Update
 
-Follow [UPGRADING.md](docs/UPGRADING.md) for image updates and the first transition from source builds. Released migrations are immutable; new migrations run on app startup. Back up the database, photos, `.env` and TLS state before updating. Keep the same Compose project name and all override files. Do not regenerate `APP_KEY` or recreate TLS volumes.
+Back up the database, photos, `.env` and certificates before updating. Keep your existing `APP_KEY` and TLS volumes:
+
+```sh
+docker compose pull
+docker compose stop
+docker compose up -d --wait
+```
+
+Keep the same `.env`, Compose project, data and override files. If you pinned an image version, change its reference in `.env` before pulling. See [UPGRADING.md](docs/UPGRADING.md) for recovery and migration details.
 
 ## Development
 
-For local tooling, use PHP 8.4 with SQLite, mbstring and GD, Composer 2, and Node.js 24. Install the locked dependencies with `composer install` and `npm ci --ignore-scripts`. Configure a separate local `.env` before running Artisan commands; never use a live database for tests.
-
-```sh
-php artisan test --compact
-vendor/bin/pint --dirty --format agent
-npm run build
-```
-
-The tests use SQLite in memory or temporary test databases and fake photo storage. Vue, JavaScript and CSS use four spaces, single quotes and a 100-column target. Optional formatting without changing project dependencies:
-
-```sh
-npm exec --yes --package=prettier@3.6.2 -- prettier --write resources/js resources/css/app.css public/sw.js --tab-width 4 --single-quote --print-width 100 --html-whitespace-sensitivity strict
-```
-
-[Preparation notes and validation](docs/publication-preparation.md).
+See [Development](docs/RELEASING.md#local-checks-before-merging) for source builds and local tests.
 
 ## License
 
 [MIT](LICENSE) · Copyright © 2026 Michele Brandolin. Demo photographs retain their original licenses; see the [photo credits](docs/images/README.md).
-
-## Releases and source builds
-
-See [RELEASING.md](docs/RELEASING.md) for local checks, GHCR publication and schema policy. For local Docker builds, use `docker compose -f compose.yaml -f compose.build.yaml up -d --build --wait` from a source checkout with a separate development environment and data. See the same guide before adding optional backup overrides to a source build.

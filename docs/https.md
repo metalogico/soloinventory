@@ -2,6 +2,14 @@
 
 The optional `compose.https.yaml` adds Caddy with an internal certificate authority. It publishes HTTPS and an HTTP redirect, and removes the app's direct HTTP port. Caddy uses 128 MiB and its own persistent `tls` and `tls_config` volumes. Compose's [`!reset` merge tag](https://docs.docker.com/reference/compose-file/merge/#reset-value) clears the backend port mapping.
 
+First download the optional HTTPS files into the directory containing `compose.yaml` and `.env`:
+
+```sh
+curl -fL https://raw.githubusercontent.com/metalogico/soloinventory/main/compose.https.yaml -o compose.https.yaml
+mkdir -p docker
+curl -fL https://raw.githubusercontent.com/metalogico/soloinventory/main/docker/Caddyfile -o docker/Caddyfile
+```
+
 1. Complete the README setup, including the application key and account.
 2. Make `soloinventory.home.arpa` resolve to your server's LAN address using your local DNS. You can instead set `SOLOINVENTORY_HOST` to a server IP address.
 3. Edit `.env` for the address your devices use:
