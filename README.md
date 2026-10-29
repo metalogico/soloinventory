@@ -26,23 +26,20 @@ Built with Laravel 13, PHP 8.4, Vue 3, Element Plus, Tailwind CSS and SQLite.
 
 ## Install with Docker Compose
 
-Use the versioned installation bundle attached to a successful [GitHub Release](https://github.com/metalogico/soloinventory/releases). Images are published to `ghcr.io/metalogico/soloinventory` for Linux AMD64 and ARM64. Docker chooses the host architecture. No Git, PHP, Python, Composer or Node installation is required on the server.
+Docker downloads the prebuilt GHCR images for Linux AMD64 or ARM64. No Git, PHP, Python, Composer or Node installation is required on the server. Docker Compose 2.24.4 or newer is required.
 
-The first planned version is **1.0.0**. These downloads become available after its release workflow succeeds and the GHCR packages are public. On macOS, replace `sha256sum -c` with `shasum -a 256 -c`.
+The workflow publishes images when code reaches `main`. Wait for **Publish Docker images** to succeed and for the GHCR packages to be public before installing. `latest` follows main; `sha-<full commit>` selects a specific build.
+
+Download the installation files from main. The archive also contains the source, but installation does not compile it:
 
 ```sh
-VERSION=1.0.0
 mkdir soloinventory
 cd soloinventory
-curl -fLO "https://github.com/metalogico/soloinventory/releases/download/v${VERSION}/soloinventory-${VERSION}-install.tar.gz"
-curl -fLO "https://github.com/metalogico/soloinventory/releases/download/v${VERSION}/SHA256SUMS"
-sha256sum -c SHA256SUMS
-tar -xzf "soloinventory-${VERSION}-install.tar.gz"
+curl -fL "https://github.com/metalogico/soloinventory/archive/refs/heads/main.tar.gz" -o source.tar.gz
+tar -xzf source.tar.gz --strip-components=1
 ```
 
-For an existing installation, follow [the transition guide](docs/UPGRADING.md) instead of copying a new `.env`.
-
-You need Docker with Linux containers and Compose 2.24.4 or newer. Run the following commands in the extracted installation directory.
+For an existing installation, follow [the transition guide](docs/UPGRADING.md) instead of copying a new `.env`. Run the following commands in the extracted directory.
 
 ```sh
 cp .env.example .env
@@ -92,7 +89,7 @@ By default, HTTP listens on loopback. To serve other devices on your private net
 | `SOLOINVENTORY_BIND_IP` | Published host address; default `127.0.0.1`. |
 | `SOLOINVENTORY_HTTP_PORT` | HTTP host port; default `8091`. |
 | `SOLOINVENTORY_ENV_FILE` | Container environment file; default `.env`. |
-| `SOLOINVENTORY_IMAGE` | Published image reference; default `ghcr.io/metalogico/soloinventory:1.0.0`. |
+| `SOLOINVENTORY_IMAGE` | Published image reference; default `ghcr.io/metalogico/soloinventory:latest`. |
 
 If you use another environment file, select it in both places: set `SOLOINVENTORY_ENV_FILE=.env.local` inside that file and pass `--env-file .env.local` to every Compose command. Use the same Compose project name on every command; changing `-p` selects different volumes.
 
@@ -159,4 +156,4 @@ npm exec --yes --package=prettier@3.6.2 -- prettier --write resources/js resourc
 
 ## Releases and source builds
 
-See [RELEASING.md](docs/RELEASING.md) for CI, GHCR publication and schema policy. For local Docker builds, use `docker compose -f compose.yaml -f compose.build.yaml up -d --build --wait` from a source checkout with a separate development environment and data. See the same guide before adding optional backup overrides to a source build.
+See [RELEASING.md](docs/RELEASING.md) for local checks, GHCR publication and schema policy. For local Docker builds, use `docker compose -f compose.yaml -f compose.build.yaml up -d --build --wait` from a source checkout with a separate development environment and data. See the same guide before adding optional backup overrides to a source build.

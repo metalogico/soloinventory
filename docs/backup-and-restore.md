@@ -30,7 +30,7 @@ chmod 600 backups/storage-before-update.tar.gz
 docker compose up -d --wait
 ```
 
-Check that the archive command succeeds before proceeding. A fixed name is used for readability; use a distinct filename for each retained backup. Copy the archive and a private copy of `.env` to another disk. Retain the source revision and an image export, for example `docker image save ghcr.io/metalogico/soloinventory:1.0.0 -o backups/app-image.tar`. Match that tag to your configured `SOLOINVENTORY_IMAGE`.
+Check that the archive command succeeds before proceeding. A fixed name is used for readability; use a distinct filename for each retained backup. Copy the archive and a private copy of `.env` to another disk. Retain the source revision and an image export, for example `docker image save ghcr.io/metalogico/soloinventory:latest -o backups/app-image.tar`. Match that tag to your configured `SOLOINVENTORY_IMAGE`.
 
 If the scheduled backup service is running, stop it too before taking a cold archive and restart it afterward. For HTTPS, use `-f compose.yaml -f compose.https.yaml` consistently and retain `tls` and `tls_config` as well. You can export each stopped TLS volume with a helper container following the [Docker volume backup procedure](https://docs.docker.com/engine/storage/volumes/#back-up-restore-or-migrate-data-volumes). The CA private key is sensitive; keep the export private.
 
