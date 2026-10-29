@@ -1,8 +1,7 @@
 name: sh-soloinventory
 services:
   app:
-    build: .
-    image: ${SOLOINVENTORY_IMAGE:-sh-soloinventory:local}
+    image: ${SOLOINVENTORY_IMAGE:-ghcr.io/metalogico/soloinventory:1.0.0}
     restart: unless-stopped
     init: true
     mem_limit: 512m

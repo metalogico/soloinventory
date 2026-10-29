@@ -26,23 +26,33 @@ Built with Laravel 13, PHP 8.4, Vue 3, Element Plus, Tailwind CSS and SQLite.
 
 ## Install with Docker Compose
 
-You need Git, Docker with Linux containers, and Docker Compose 2.24.4 or newer. The image build has been checked for `linux/amd64` and `linux/arm64`. PHP, Composer and Node.js are only needed inside the build containers.
+Use the versioned installation bundle attached to a successful [GitHub Release](https://github.com/metalogico/soloinventory/releases). Images are published to `ghcr.io/metalogico/soloinventory` for Linux AMD64 and ARM64. Docker chooses the host architecture. No Git, PHP, Python, Composer or Node installation is required on the server.
 
-The app image is built from this repository. No published SoloInventory image is required. Run the following commands from the repository directory. They use the standard Docker CLI; RTK is optional.
-
-### 1. Get the source and build
+The first planned version is **1.0.0**. These downloads become available after its release workflow succeeds and the GHCR packages are public. On macOS, replace `sha256sum -c` with `shasum -a 256 -c`.
 
 ```sh
-git clone https://github.com/metalogico/soloinventory.git
+VERSION=1.0.0
+mkdir soloinventory
 cd soloinventory
-cp .env.example .env
-chmod 600 .env
-docker compose build app
+curl -fLO "https://github.com/metalogico/soloinventory/releases/download/v${VERSION}/soloinventory-${VERSION}-install.tar.gz"
+curl -fLO "https://github.com/metalogico/soloinventory/releases/download/v${VERSION}/SHA256SUMS"
+sha256sum -c SHA256SUMS
+tar -xzf "soloinventory-${VERSION}-install.tar.gz"
 ```
 
-### 2. Configure the account
+For an existing installation, follow [the transition guide](docs/UPGRADING.md) instead of copying a new `.env`.
 
-Generate a key and a bcrypt password hash using the image you just built:
+You need Docker with Linux containers and Compose 2.24.4 or newer. Run the following commands in the extracted installation directory.
+
+```sh
+cp .env.example .env
+chmod 600 .env
+docker compose pull
+```
+
+### Configure the account
+
+Generate a key and a bcrypt password hash using the downloaded image:
 
 ```sh
 docker compose run --rm --no-deps app php artisan key:generate --show --no-interaction
@@ -59,7 +69,7 @@ SOLOINVENTORY_PASSWORD_HASH='paste-the-generated-bcrypt-hash'
 
 Keep the bcrypt hash in **single quotes**, so Compose preserves its `$` characters. There are no default login credentials. Keep `.env` private and retain `APP_KEY` across updates.
 
-### 3. Start
+### Start
 
 ```sh
 docker compose config --quiet
@@ -82,7 +92,7 @@ By default, HTTP listens on loopback. To serve other devices on your private net
 | `SOLOINVENTORY_BIND_IP` | Published host address; default `127.0.0.1`. |
 | `SOLOINVENTORY_HTTP_PORT` | HTTP host port; default `8091`. |
 | `SOLOINVENTORY_ENV_FILE` | Container environment file; default `.env`. |
-| `SOLOINVENTORY_IMAGE` | Local image tag; default `sh-soloinventory:local`. |
+| `SOLOINVENTORY_IMAGE` | Published image reference; default `ghcr.io/metalogico/soloinventory:1.0.0`. |
 
 If you use another environment file, select it in both places: set `SOLOINVENTORY_ENV_FILE=.env.local` inside that file and pass `--env-file .env.local` to every Compose command. Use the same Compose project name on every command; changing `-p` selects different volumes.
 
@@ -123,20 +133,7 @@ See [backup and restore](docs/backup-and-restore.md) for a complete cold backup,
 
 ## Update
 
-This project is still in development. Schema compatibility between revisions is not guaranteed; review changes before updating. Development currently edits the original migrations rather than providing incremental upgrade migrations.
-
-1. Save a complete backup and retain the current source revision, `.env` and image.
-2. Fetch and inspect the revision you intend to run. Do not replace local changes blindly.
-3. Build and recreate the app using the same project name and environment file:
-
-```sh
-git pull --ff-only
-docker compose build app
-docker compose up -d --wait
-docker compose ps
-```
-
-When using HTTPS, add `-f compose.yaml -f compose.https.yaml` to **every** Compose command. Keep the TLS volumes to retain the trusted CA. Automatic startup migrations apply only migrations that have not already run; they do not reconcile edits to an existing migration. If a revision changes an already-applied schema, it needs a reviewed migration or an explicit recovery/import plan before use with existing data. Rebuilding alone is insufficient.
+Follow [UPGRADING.md](docs/UPGRADING.md) for image updates and the first transition from source builds. Released migrations are immutable; new migrations run on app startup. Back up the database, photos, `.env` and TLS state before updating. Keep the same Compose project name and all override files. Do not regenerate `APP_KEY` or recreate TLS volumes.
 
 ## Development
 
@@ -159,3 +156,7 @@ npm exec --yes --package=prettier@3.6.2 -- prettier --write resources/js resourc
 ## License
 
 [MIT](LICENSE) · Copyright © 2026 Michele Brandolin. Demo photographs retain their original licenses; see the [photo credits](docs/images/README.md).
+
+## Releases and source builds
+
+See [RELEASING.md](docs/RELEASING.md) for CI, GHCR publication and schema policy. For local Docker builds, use `docker compose -f compose.yaml -f compose.build.yaml up -d --build --wait` from a source checkout with a separate development environment and data. See the same guide before adding optional backup overrides to a source build.

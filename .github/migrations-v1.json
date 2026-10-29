@@ -1,0 +1,9 @@
+{
+  "database/migrations/0001_01_01_000000_create_users_table.php": "10d79883bc08ce46510f9ad8b1830b4d06d586dc56ae2c8bac3b3e491f69a90f",
+  "database/migrations/0001_01_01_000001_create_cache_table.php": "fbb4665e5a977e71df4e74ec75b3c06ca4f17ad0de7138fe9786639189978e77",
+  "database/migrations/0001_01_01_000002_create_jobs_table.php": "df4910687180313a14a3f96a8bddd808ae145ed1b107cd772caf865c0dc2b746",
+  "database/migrations/2026_10_27_083623_create_sections_table.php": "b6d1e984b661a3e01da18a1288c70f04a81c1c9140db163ca65251fc46c7a1c4",
+  "database/migrations/2026_10_27_083624_create_categories_table.php": "65b3436d08f1e53f3161dd60e5913eec6810d50fa588c4e0f3eae6782f2fc1b9",
+  "database/migrations/2026_10_27_083625_create_positions_table.php": "980ec7bdf9eefd34cda202a68f0038b0f029a7b92a24cac890fe7eaff45ea532",
+  "database/migrations/2026_10_27_083626_create_inventory_items_table.php": "92a0d4214bc0232ee33f0e361b893188d07820bcf24ad7ebb9d94806c63cf927"
+}

@@ -15,7 +15,7 @@ soloinventory-YYYYMMDD-HHMMSS-xxxxxx/
 
 The manifest covers the database and every copied photo. Verify the SHA-256 values before restoring. These snapshots do not include `.env`, the source code, the Docker image or the optional HTTPS authority. Preserve those separately. No retention or automatic cleanup is enabled by the base stack.
 
-For a manual recovery from a snapshot, stop the app, keep a copy of the current data, and use a helper container for the same source revision. Copy `database.sqlite` to `storage/app/soloinventory.sqlite` and the snapshot's `photos/` to `storage/app/private/soloinventory/photos/`. Keep ownership writable by `www-data` (UID/GID 33 in the image). Start the recovered data in an isolated Compose project first and check sign-in, item counts and photos. A snapshot may contain private information and must be stored privately.
+For a manual recovery from a snapshot, stop the app, keep a copy of the current data, and use a helper container for the same image version. Copy `database.sqlite` to `storage/app/soloinventory.sqlite` and the snapshot's `photos/` to `storage/app/private/soloinventory/photos/`. Keep ownership writable by `www-data` (UID/GID 33 in the image). Start the recovered data in an isolated Compose project first and check sign-in, item counts and photos. A snapshot may contain private information and must be stored privately.
 
 ## Complete cold backup
 
@@ -30,13 +30,13 @@ chmod 600 backups/storage-before-update.tar.gz
 docker compose up -d --wait
 ```
 
-Check that the archive command succeeds before proceeding. A fixed name is used for readability; use a distinct filename for each retained backup. Copy the archive and a private copy of `.env` to another disk. Retain the source revision and an image export, for example `docker image save sh-soloinventory:local -o backups/app-image.tar`. Match that tag to your configured `SOLOINVENTORY_IMAGE`.
+Check that the archive command succeeds before proceeding. A fixed name is used for readability; use a distinct filename for each retained backup. Copy the archive and a private copy of `.env` to another disk. Retain the source revision and an image export, for example `docker image save ghcr.io/metalogico/soloinventory:1.0.0 -o backups/app-image.tar`. Match that tag to your configured `SOLOINVENTORY_IMAGE`.
 
 If the scheduled backup service is running, stop it too before taking a cold archive and restart it afterward. For HTTPS, use `-f compose.yaml -f compose.https.yaml` consistently and retain `tls` and `tls_config` as well. You can export each stopped TLS volume with a helper container following the [Docker volume backup procedure](https://docs.docker.com/engine/storage/volumes/#back-up-restore-or-migrate-data-volumes). The CA private key is sensitive; keep the export private.
 
 ## Test a cold restore in a separate project
 
-Use the backed-up source revision and matching image. Keep your working installation intact. Copy the backed-up environment file to `.env.restore` and edit these values:
+Use the backed-up installation files and matching image version. Keep your working installation intact. Copy the backed-up environment file to `.env.restore` and edit these values:
 
 ```dotenv
 SOLOINVENTORY_ENV_FILE=.env.restore

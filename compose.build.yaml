@@ -1,0 +1,5 @@
+# Source builds for development only. Add this file after compose.yaml.
+services:
+  app:
+    build: .
+    image: ${SOLOINVENTORY_BUILD_IMAGE:-soloinventory:dev}

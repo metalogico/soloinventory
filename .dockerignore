@@ -34,3 +34,6 @@ README.md
 .phpunit.cache
 .idea
 .vscode
+
+# Local release packaging output
+dist-release/

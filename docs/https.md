@@ -19,7 +19,8 @@ SESSION_SECURE_COOKIE=true
 
 ```sh
 docker compose -f compose.yaml -f compose.https.yaml config --quiet
-docker compose -f compose.yaml -f compose.https.yaml up -d --build --wait
+docker compose -f compose.yaml -f compose.https.yaml pull
+docker compose -f compose.yaml -f compose.https.yaml up -d --wait
 ```
 
 5. Retrieve the public root certificate at `http://soloinventory.home.arpa:8091/certificato.crt`. Confirm its fingerprint against the certificate on your server before trusting it. Alternatively, copy it directly from your own container:
