@@ -15,7 +15,7 @@ use Throwable;
 class InventoryStorage
 {
     /**
-     * Writes and backups share a lock so SQLite records and photo files stay consistent.
+     * Serialize inventory writes so records and photo changes cannot overlap.
      */
     public function synchronized(Closure $operation): mixed
     {

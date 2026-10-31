@@ -40,8 +40,8 @@ COPY --from=frontend --chown=www-data:www-data /build/public/build ./public/buil
 COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
 COPY docker/php.ini /usr/local/etc/php/conf.d/soloinventory.ini
 RUN sed -i 's/Listen 80/Listen 8080/' /etc/apache2/ports.conf \
-    && mkdir -p storage/app/private/soloinventory/photos storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs /backups \
-    && chown -R www-data:www-data storage bootstrap/cache /backups \
+    && mkdir -p storage/app/private/soloinventory/photos storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs \
+    && chown -R www-data:www-data storage bootstrap/cache \
     && chmod +x docker/entrypoint.sh
 USER www-data
 EXPOSE 8080

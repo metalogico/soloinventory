@@ -1,13 +1,11 @@
 *.log
 .DS_Store
 .env
-.env.backup
 .env.production
 ACCESS.txt
 source.tar.gz
 .env.*
 !.env.example
-/backups
 /certificates
 /database/*.sqlite*
 /storage/app/demo.sqlite*

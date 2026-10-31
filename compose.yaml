@@ -24,7 +24,6 @@ services:
       - "${SOLOINVENTORY_BIND_IP:-127.0.0.1}:${SOLOINVENTORY_HTTP_PORT:-8091}:8080"
     volumes:
       - data:/var/www/html/storage
-      - backups:/backups
     healthcheck:
       test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1:8080/up') === false ? 1 : 0);"]
       interval: 30s
@@ -33,4 +32,3 @@ services:
       start_period: 40s
 volumes:
   data:
-  backups:

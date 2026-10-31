@@ -16,7 +16,7 @@ The screenshot uses illustrative data. [Photo credits](docs/images/README.md).
 - Edit every field, move items between sections, and permanently delete items after confirmation.
 - Use one shared household account. Inventory records, settings and photos require sign-in.
 - Use the responsive English interface or install the Android PWA over trusted HTTPS. Dates use DD/MM/YYYY.
-- Store the database and private photos locally, with a consistent backup command.
+- Store the database and private photos locally.
 
 Names and serial numbers may repeat. Quantity is a whole number from 1 to 999999. Photos support JPEG, PNG and WebP, up to 12 MiB and 8000 pixels per side. Expiry dates are informational; there are no expiry alerts or reminders.
 
@@ -108,33 +108,20 @@ SQLite and photos are stored in the persistent `data` volume. The app uses a 512
 
 Locations entered while saving an item become suggestions for that section. Sections and categories can be renamed at any time. They must be empty before deletion. Changing the configured username or password hash invalidates existing sessions; recreate the app container after changing `.env`.
 
-## Data, backup and restore
+## Persistent data
 
 Compose creates project-prefixed named volumes:
 
 | Volume | Contents |
 | --- | --- |
 | `data` | SQLite database at `storage/app/soloinventory.sqlite`, private photos in `storage/app/private/soloinventory/photos`, sessions, cache and logs. |
-| `backups` | Snapshots written to `/backups` when explicitly requested. |
 | `tls`, `tls_config` | Caddy CA, certificates and state, when using the HTTPS override. |
 
 Container recreation and `docker compose down` preserve named volumes. Do not use `down --volumes` for an installation whose data you want to keep. See [Docker volume lifecycle](https://docs.docker.com/engine/storage/volumes/#a-volumes-lifecycle).
 
-Create a snapshot of SQLite and photos while the app is running:
-
-```sh
-docker compose exec app php artisan soloinventory:backup --to=/backups --no-interaction
-mkdir -p backups
-docker compose cp app:/backups/. ./backups/
-```
-
-The command coordinates with inventory writes and produces a `manifest.json` containing SHA-256 checksums. Copy backups off the server and preserve the private `.env` separately. A backup stored only in another volume on the same disk does not protect against disk failure.
-
-See [backup and restore](docs/backup-and-restore.md) for a complete cold backup, recovery into a separate stack, and the requirements of the optional scheduled backup integration.
-
 ## Update
 
-Back up the database, photos, `.env` and certificates before updating. Keep your existing `APP_KEY` and TLS volumes:
+Keep your existing database, photos, `.env`, `APP_KEY` and TLS volumes when updating:
 
 ```sh
 docker compose pull

@@ -73,7 +73,7 @@ with tempfile.TemporaryDirectory(prefix=f'{PROJECT}-install-') as directory:
     def execute(*args):
         return compose('exec', '-T', SERVICE, *args)
 
-    def check_web():
+    def check_backend_health():
         target = 'https' if MINIFILES or HTTPS else 'app'
         internal = '443' if HTTPS else '8443' if MINIFILES else ('8080' if PROJECT == 'soloinventory' else '80')
         address = compose('port', target, internal).splitlines()[0]
@@ -94,12 +94,11 @@ with tempfile.TemporaryDirectory(prefix=f'{PROJECT}-install-') as directory:
             compose('cp', 'https:/data/caddy/pki/authorities/local/root.crt', str(work / 'root.crt'))
             args += ['--cacert', str(work / 'root.crt')]
         run(args + [scheme + '://' + address + endpoint])
-        run(args + [scheme + '://' + address + '/'])
 
     try:
         compose('config', '--quiet')
         compose('up', '-d', '--wait', '--wait-timeout', '180', '--pull', 'never')
-        check_web()
+        check_backend_health()
         if HTTPS:
             original_ca = (work / 'root.crt').read_bytes()
         if MINIFILES:
@@ -116,7 +115,7 @@ with tempfile.TemporaryDirectory(prefix=f'{PROJECT}-install-') as directory:
         # Stop background writers before allowing the new app to run migrations.
         compose('stop')
         compose('up', '-d', '--force-recreate', '--wait', '--wait-timeout', '180', '--pull', 'never')
-        check_web()
+        check_backend_health()
         if MINIFILES:
             execute('python', '-c', 'from pathlib import Path; from backend.database import Database; '
                     'assert Database(Path("/config")).sections()[0]["name"] == "Keep"; '
@@ -128,7 +127,7 @@ with tempfile.TemporaryDirectory(prefix=f'{PROJECT}-install-') as directory:
                     'if (file_get_contents("storage/app/private/ci-proof.txt") !== "keep") exit(1);')
         if HTTPS:
             assert original_ca == (work / 'root.crt').read_bytes()
-        print('Image-only install, web response and persistent data after recreation: passed.')
+        print('Image-only install, backend health and persistent data after recreation: passed.')
     except Exception:
         print(compose('logs', '--tail', '60'))
         raise

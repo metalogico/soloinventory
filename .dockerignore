@@ -15,7 +15,6 @@ public/storage
 storage
 database/*.sqlite*
 bootstrap/cache/*.php
-backups
 tests
 .DS_Store
 
